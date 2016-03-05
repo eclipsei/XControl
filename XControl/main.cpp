@@ -1,7 +1,6 @@
 
 #include <Windows.h>
 #include <iostream>
-#include <thread>
 
 #include <xinput.h>
 #include "XInputWrapper.h"
@@ -9,6 +8,7 @@
 int main(void) {
 
 	XInputWrapper xiw = XInputWrapper(); // a handle for the wrapper
+	xiw.InitConfiguration();
 
 	if (xiw.CheckConnection()) { // check if controller found
 		std::cout << "Controller found with ID: " << xiw.GetControllerID() << std::endl;

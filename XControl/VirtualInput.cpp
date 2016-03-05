@@ -111,6 +111,23 @@ void VirtualInput::ScrollWheelMove(float y) {
 	Input.type = INPUT_MOUSE;
 	Input.mi.dwFlags = MOUSEEVENTF_WHEEL;
 	Input.mi.mouseData = scrollSpeed*y;
+	SendInput(1, &Input, sizeof(INPUT));
+}
 
+void VirtualInput::keyDown(WORD key) {
+	INPUT Input;
+	ZeroMemory(&Input, sizeof(INPUT));
+	Input.type = INPUT_KEYBOARD;
+	Input.ki.dwFlags = 0; // 0 means key is pressed
+	Input.ki.wVk = key;
+	SendInput(1, &Input, sizeof(INPUT));
+}
+
+void VirtualInput::keyUp(WORD key) {
+	INPUT Input;
+	ZeroMemory(&Input, sizeof(INPUT));
+	Input.type = INPUT_KEYBOARD;
+	Input.ki.dwFlags = KEYEVENTF_KEYUP;
+	Input.ki.wVk = key;
 	SendInput(1, &Input, sizeof(INPUT));
 }

@@ -29,6 +29,9 @@ public:
 	void ScrollWheelDown(); // scrollwheel pressed
 	void ScrollWheelUp(); // scrollwheel released
 	void ScrollWheelMove(float); // use scrollwheel, negative values move downwards
+
+	void keyDown(WORD); // specified key down (see https://msdn.microsoft.com/en-us/library/windows/desktop/dd375731(v=vs.85).aspx for keycodes)
+	void keyUp(WORD); // specified key up
 };
 
 #endif

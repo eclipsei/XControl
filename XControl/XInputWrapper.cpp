@@ -7,75 +7,109 @@ void XInputWrapper::UpdateScene() {
 
 	VirtualInput vi = VirtualInput();
 
-	/* A button */
-	if (IsPressed(XINPUT_GAMEPAD_A, currentState)) { // if pressed in the current state
-		if (!IsPressed(XINPUT_GAMEPAD_A, previousState)) { // if not pressed in the previous state
-			std::cout << "A pressed\n";
-			vi.MouseLeftDown();
+	for (std::vector<MappedKey>::iterator it = mapConfiguration.begin(); it != mapConfiguration.end(); ++it) {
+		int type = it->type;
+		auto vk = it->virtualKey;
+		auto button = it->controllerButton;
+
+		switch (type) { // depending on type of input (keyboard or mouse)
+		case MAP_TYPE_MOUSE: // handle mouse mappings
+
+			switch (vk) { // depending on which mouse button
+
+			case VK_LBUTTON:
+				if (IsPressed(button, currentState)) { // if pressed in the current state
+					if (!IsPressed(button, previousState)) { // if not pressed in the previous state
+						vi.MouseLeftDown();
+					}
+				}
+				else { // if not pressed in the current state
+					if (IsPressed(button, previousState)) { // if pressed in the previous state
+						vi.MouseLeftUp();
+					}
+				}
+				break;
+
+			case VK_RBUTTON:
+				if (IsPressed(button, currentState)) { // if pressed in the current state
+					if (!IsPressed(button, previousState)) { // if not pressed in the previous state
+						vi.MouseRightDown();
+					}
+				}
+				else { // if not pressed in the current state
+					if (IsPressed(button, previousState)) { // if pressed in the previous state
+						vi.MouseRightUp();
+					}
+				}
+				break;
+
+			case VK_MBUTTON:
+				if (IsPressed(button, currentState)) { // if pressed in the current state
+					if (!IsPressed(button, previousState)) { // if not pressed in the previous state
+						vi.ScrollWheelDown();
+					}
+				}
+				else { // if not pressed in the current state
+					if (IsPressed(button, previousState)) { // if pressed in the previous state
+						vi.ScrollWheelUp();
+					}
+				}
+				break;
+
+			case VK_XBUTTON1:
+				if (IsPressed(button, currentState)) { // if pressed in the current state
+					if (!IsPressed(button, previousState)) { // if not pressed in the previous state
+						vi.MouseX1Down();
+					}
+				}
+				else { // if not pressed in the current state
+					if (IsPressed(button, previousState)) { // if pressed in the previous state
+						vi.MouseX1Up();
+					}
+				}
+				break;
+
+			case VK_XBUTTON2:
+				if (IsPressed(button, currentState)) { // if pressed in the current state
+					if (!IsPressed(button, previousState)) { // if not pressed in the previous state
+						vi.MouseX2Down();
+					}
+				}
+				else { // if not pressed in the current state
+					if (IsPressed(button, previousState)) { // if pressed in the previous state
+						vi.MouseX2Up();
+					}
+				}
+				break;
+
+			default:
+				std::cout << "Update scene unhandled case (MOUSE)!\n";
+				break;
+			}
+
+			break;
+
+
+		case MAP_TYPE_KEYBOARD: // handle keyboard mappings
+			if (IsPressed(button, currentState)) { // if pressed in the current state
+				if (!IsPressed(button, previousState)) { // if not pressed in the previous state
+					vi.keyDown(vk);
+				}
+			}
+			else { // if not pressed in the current state
+				if (IsPressed(button, previousState)) { // if pressed in the previous state
+					vi.keyUp(vk);
+				}
+			}
+			break;
+
+		default:
+			std::cout << "Update scene unhandled case (KEYBOARD)!\n";
+			break;
 		}
-	}
-	else { // if not pressed in the current state
-		if (IsPressed(XINPUT_GAMEPAD_A, previousState)) { // if pressed in the previous state
-			vi.MouseLeftUp();
-			std::cout << "A released\n";
-		}
+
 	}
 
-	/* B button */
-	if (IsPressed(XINPUT_GAMEPAD_B, currentState)) { // if pressed in the current state
-		if (!IsPressed(XINPUT_GAMEPAD_B, previousState)) { // if not pressed in the previous state
-			vi.MouseRightDown();
-			std::cout << "B pressed\n";
-		}
-	}
-	else { // if not pressed in the current state
-		if (IsPressed(XINPUT_GAMEPAD_B, previousState)) { // if pressed in the previous state
-			vi.MouseRightUp();
-			std::cout << "B released\n";
-		}
-	}
-
-	/* Y button */
-	if (IsPressed(XINPUT_GAMEPAD_Y, currentState)) { // if pressed in the current state
-		if (!IsPressed(XINPUT_GAMEPAD_Y, previousState)) { // if not pressed in the previous state
-			vi.ScrollWheelDown();
-			std::cout << "Y pressed\n";
-		}
-	}
-	else { // if not pressed in the current state
-		if (IsPressed(XINPUT_GAMEPAD_Y, previousState)) { // if pressed in the previous state
-			vi.ScrollWheelUp();
-			std::cout << "Y released\n";
-		}
-	}
-
-	/* Left shoulder */
-	if (IsPressed(XINPUT_GAMEPAD_LEFT_SHOULDER, currentState)) {
-		if (!IsPressed(XINPUT_GAMEPAD_LEFT_SHOULDER, previousState)) {
-			vi.MouseX1Down();
-			std::cout << "Left shoulder pressed\n";
-		}
-	}
-	else {
-		if (IsPressed(XINPUT_GAMEPAD_LEFT_SHOULDER, previousState)) {
-			vi.MouseX1Up();
-			std::cout << "Left shoulder released\n";
-		}
-	}
-
-	/* Right shoulder */
-	if (IsPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER, currentState)) {
-		if (!IsPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER, previousState)) {
-			vi.MouseX2Down();
-			std::cout << "Right shoulder pressed\n";
-		}
-	}
-	else {
-		if (IsPressed(XINPUT_GAMEPAD_RIGHT_SHOULDER, previousState)) {
-			vi.MouseX2Up();
-			std::cout << "Right shoulder released\n";
-		}
-	}
 
 	/* Moving the mouse based on left thumbstick */
 	vi.MoveMouse(thumbSticks.LTx, thumbSticks.LTy);
@@ -93,6 +127,10 @@ bool XInputWrapper::IsPressed(WORD button, XINPUT_STATE state) {
 
 XINPUT_GAMEPAD* XInputWrapper::GetCurrentState() {
 	return &currentState.Gamepad;
+}
+
+XINPUT_GAMEPAD* XInputWrapper::GetPreviousState() {
+	return &previousState.Gamepad;
 }
 
 bool XInputWrapper::CheckConnection() {
@@ -166,4 +204,44 @@ void XInputWrapper::Start(int refreshRate) {
 	while (Refresh()) { // start the loop
 		Sleep(sleepTime);
 	}
+}
+
+void XInputWrapper::InitConfiguration() {
+	MappedKey mk;
+	mk.type = MAP_TYPE_MOUSE;
+	mk.controllerButton = XINPUT_GAMEPAD_A;
+	mk.virtualKey = VK_LBUTTON;
+
+	mapConfiguration.push_back(mk);
+
+	mk.type = MAP_TYPE_MOUSE;
+	mk.controllerButton = XINPUT_GAMEPAD_B;
+	mk.virtualKey = VK_RBUTTON;
+
+	mapConfiguration.push_back(mk);
+
+	mk.type = MAP_TYPE_MOUSE;
+	mk.controllerButton = XINPUT_GAMEPAD_Y;
+	mk.virtualKey = VK_MBUTTON;
+
+	mapConfiguration.push_back(mk);
+
+	mk.type = MAP_TYPE_MOUSE;
+	mk.controllerButton = XINPUT_GAMEPAD_LEFT_SHOULDER;
+	mk.virtualKey = VK_XBUTTON1;
+
+	mapConfiguration.push_back(mk);
+
+	mk.type = MAP_TYPE_MOUSE;
+	mk.controllerButton = XINPUT_GAMEPAD_RIGHT_SHOULDER;
+	mk.virtualKey = VK_XBUTTON2;
+
+	mapConfiguration.push_back(mk);
+
+	mk.type = MAP_TYPE_KEYBOARD;
+	mk.controllerButton = XINPUT_GAMEPAD_X;
+	mk.virtualKey = VK_RETURN;
+
+	mapConfiguration.push_back(mk);
+
 }
